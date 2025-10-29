@@ -154,12 +154,56 @@
         }
 
         .prompt-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 20px;
             color: #2d3748;
             padding-bottom: 12px;
             border-bottom: 2px solid #e2e8f0;
+        }
+
+        .prompt-header-title {
+            margin-right: auto;
+        }
+
+        .metric-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            background: #edf2f7;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+            white-space: nowrap;
+        }
+
+        .metric-badge-name {
+            margin-right: 4px;
+            color: #718096;
+        }
+
+        .metric-badge-value {
+            color: #2d3748;
+            font-weight: 700;
+        }
+
+        .metric-badge[data-metric-color] {
+            background: var(--metric-bg);
+            color: var(--metric-text);
+        }
+
+        .metric-badge[data-metric-color] .metric-badge-name {
+            color: var(--metric-text);
+            opacity: 0.8;
+        }
+
+        .metric-badge[data-metric-color] .metric-badge-value {
+            color: var(--metric-text);
         }
 
         .prompt-section {
@@ -410,6 +454,136 @@
         .empty-state-text {
             font-size: 16px;
         }
+
+        .score-filter-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .score-filter-section.visible {
+            display: block;
+        }
+
+        .score-filter-section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        .score-matrix-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .score-matrix {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 600px;
+        }
+
+        .score-matrix th,
+        .score-matrix td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        .score-matrix th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #2d3748;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .score-matrix th:first-child {
+            position: sticky;
+            left: 0;
+            background: #f7fafc;
+            z-index: 11;
+        }
+
+        .score-matrix td:first-child {
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 9;
+            font-weight: 600;
+        }
+
+        .score-matrix tbody tr:hover {
+            background: #f7fafc;
+        }
+
+        .score-matrix tbody tr:hover td:first-child {
+            background: #f7fafc;
+        }
+
+        .score-matrix .prompt-link {
+            color: #4299e1;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .score-matrix .prompt-link:hover {
+            color: #2c5282;
+            text-decoration: underline;
+        }
+
+        .score-cell {
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .score-cell.empty {
+            color: #cbd5e0;
+        }
+
+        .filter-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .filter-checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f7fafc;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-checkbox-item:hover {
+            background: #edf2f7;
+        }
+
+        .filter-checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .filter-checkbox-item label {
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        .filter-checkbox-item input[type="checkbox"]:checked + label {
+            color: #4299e1;
+        }
     </style>
 </head>
 <body>
@@ -420,6 +594,30 @@
             <label for="jsonFile">Upload JSON Evaluation File</label>
             <div class="file-input-wrapper">
                 <input type="file" id="jsonFile" accept=".json" />
+            </div>
+        </div>
+
+        <div id="scoreFilterSection" class="score-filter-section">
+            <h2>Score Matrix</h2>
+            <div class="score-range-filters">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #2d3748;">Filter by Score Range</h3>
+                <div class="filter-checkboxes" id="scoreRangeFilters">
+                    <div class="filter-checkbox-item">
+                        <input type="checkbox" id="score-range-poor" data-range="poor" checked>
+                        <label for="score-range-poor" style="color: #742A2A;">Poor (< 60)</label>
+                    </div>
+                    <div class="filter-checkbox-item">
+                        <input type="checkbox" id="score-range-medium" data-range="medium" checked>
+                        <label for="score-range-medium" style="color: #744210;">Medium (60-90)</label>
+                    </div>
+                    <div class="filter-checkbox-item">
+                        <input type="checkbox" id="score-range-good" data-range="good" checked>
+                        <label for="score-range-good" style="color: #22543D;">Good (≥ 90)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="score-matrix-container">
+                <table id="scoreMatrix" class="score-matrix"></table>
             </div>
         </div>
 
@@ -445,6 +643,12 @@
         const promptsContainer = document.getElementById('promptsContainer');
         const promptsList = document.getElementById('promptsList');
         const emptyState = document.getElementById('emptyState');
+        const scoreFilterSection = document.getElementById('scoreFilterSection');
+        const scoreMatrix = document.getElementById('scoreMatrix');
+        const scoreRangeFilters = document.getElementById('scoreRangeFilters');
+
+        let allPrompts = [];
+        let selectedScoreRanges = new Set(['poor', 'medium', 'good']); // All selected by default
 
         fileInput.addEventListener('change', handleFileUpload);
 
@@ -474,8 +678,12 @@
                 metadataSection.classList.add('visible');
             }
 
-            // Display prompts
+            // Store prompts and build score matrix
             if (data.prompts && Array.isArray(data.prompts)) {
+                allPrompts = data.prompts;
+                buildScoreMatrix(data.prompts);
+                setupScoreRangeFilters();
+                scoreFilterSection.classList.add('visible');
                 displayPrompts(data.prompts);
                 promptsContainer.classList.add('visible');
             }
@@ -515,7 +723,17 @@
         }
 
         function displayPrompts(prompts) {
-            promptsList.innerHTML = prompts.map(prompt => createPromptCard(prompt)).join('');
+            // Filter prompts based on selected score range filters
+            const filteredPrompts = filterPromptsByScoreRange(prompts);
+            
+            promptsList.innerHTML = filteredPrompts.map(prompt => createPromptCard(prompt)).join('');
+            
+            // Add ID and data attribute to each prompt card for filtering and scrolling
+            document.querySelectorAll('.prompt-card').forEach((card, index) => {
+                const promptId = filteredPrompts[index].prompt_id;
+                card.setAttribute('id', `prompt-${promptId}`);
+                card.setAttribute('data-prompt-id', promptId);
+            });
             
             // Attach event listeners to expanders
             document.querySelectorAll('.metrics-header').forEach(header => {
@@ -525,6 +743,173 @@
                     content.classList.toggle('expanded');
                     toggle.classList.toggle('expanded');
                 });
+            });
+        }
+
+        function buildScoreMatrix(prompts) {
+            // Collect all unique metric names
+            const metricNames = new Set();
+            prompts.forEach(prompt => {
+                if (prompt.prompt_level_metric_results) {
+                    prompt.prompt_level_metric_results.forEach(metric => {
+                        if (metric.metric_name) {
+                            metricNames.add(metric.metric_name);
+                        }
+                    });
+                }
+            });
+
+            const sortedMetricNames = Array.from(metricNames).sort();
+
+            // Build table header
+            let html = '<thead><tr><th>Prompt</th>';
+            sortedMetricNames.forEach(metricName => {
+                html += `<th>${escapeHtml(metricName)}</th>`;
+            });
+            html += '</tr></thead>';
+
+            // Build table body
+            html += '<tbody>';
+            prompts.forEach(prompt => {
+                html += `<tr><td><a href="#prompt-${prompt.prompt_id}" class="prompt-link" data-prompt-id="${prompt.prompt_id}">Prompt #${prompt.prompt_id}</a></td>`;
+                
+                sortedMetricNames.forEach(metricName => {
+                    const metric = prompt.prompt_level_metric_results?.find(m => m.metric_name === metricName);
+                    if (metric && metric.number_value !== undefined && metric.number_value !== null) {
+                        const value = metric.metric_value_type === 'METRIC_VALUE_TYPE_PERCENTAGE'
+                            ? `${metric.number_value.toFixed(0)}%`
+                            : metric.number_value.toString();
+                        const color = getScoreColor(metric.number_value);
+                        html += `<td class="score-cell" style="background-color: ${color.bg}; color: ${color.text};">${value}</td>`;
+                    } else {
+                        html += '<td class="score-cell empty">—</td>';
+                    }
+                });
+                html += '</tr>';
+            });
+            html += '</tbody>';
+
+            scoreMatrix.innerHTML = html;
+
+            // Add click handlers to prompt links
+            scoreMatrix.querySelectorAll('.prompt-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const promptId = this.getAttribute('data-prompt-id');
+                    scrollToPrompt(promptId);
+                });
+            });
+        }
+
+
+        function setupScoreRangeFilters() {
+            // Add event listeners to score range checkboxes
+            scoreRangeFilters.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const range = this.getAttribute('data-range');
+                    if (this.checked) {
+                        selectedScoreRanges.add(range);
+                    } else {
+                        selectedScoreRanges.delete(range);
+                    }
+                    // Re-display prompts and score matrix with new filter
+                    displayPrompts(allPrompts);
+                    updateScoreMatrix();
+                });
+            });
+        }
+
+        function getScoreRange(score) {
+            if (score < 60) {
+                return 'poor';
+            } else if (score < 90) {
+                return 'medium';
+            } else {
+                return 'good';
+            }
+        }
+
+        function scrollToPrompt(promptId) {
+            // Try to find the prompt card - it might be filtered out
+            let promptCard = document.getElementById(`prompt-${promptId}`);
+            
+            // If the prompt is not visible (filtered out), find it in allPrompts and make sure it's shown
+            if (!promptCard) {
+                // Find the prompt in allPrompts
+                const prompt = allPrompts.find(p => p.prompt_id === parseInt(promptId));
+                if (prompt && prompt.prompt_level_metric_results) {
+                    // Ensure the score range for this metric is selected
+                    prompt.prompt_level_metric_results.forEach(metric => {
+                        if (metric.number_value !== undefined && metric.number_value !== null) {
+                            const range = getScoreRange(metric.number_value);
+                            selectedScoreRanges.add(range);
+                            // Update the score range checkbox
+                            const rangeCheckbox = scoreRangeFilters.querySelector(`input[data-range="${range}"]`);
+                            if (rangeCheckbox) {
+                                rangeCheckbox.checked = true;
+                            }
+                        }
+                    });
+                    
+                    // Re-display prompts with updated filters
+                    displayPrompts(allPrompts);
+                    
+                    // Wait a moment for DOM to update, then scroll
+                    setTimeout(() => {
+                        promptCard = document.getElementById(`prompt-${promptId}`);
+                        if (promptCard) {
+                            promptCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            highlightPromptCard(promptCard);
+                        }
+                    }, 100);
+                    return;
+                }
+            }
+            
+            if (promptCard) {
+                // Scroll to the prompt card
+                promptCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                highlightPromptCard(promptCard);
+            }
+        }
+
+        function highlightPromptCard(card) {
+            // Highlight the prompt card briefly
+            card.style.transition = 'box-shadow 0.3s ease';
+            card.style.boxShadow = '0 4px 12px rgba(66, 153, 225, 0.5)';
+            
+            setTimeout(() => {
+                card.style.boxShadow = '';
+            }, 2000);
+        }
+
+        function filterPromptsByScoreRange(prompts) {
+            // If no filters selected, show all prompts
+            const hasScoreRangeFilter = selectedScoreRanges.size > 0;
+
+            if (!hasScoreRangeFilter) {
+                return prompts;
+            }
+
+            // Filter prompts that have at least one metric score in the selected score ranges
+            return prompts.filter(prompt => {
+                if (!prompt.prompt_level_metric_results || prompt.prompt_level_metric_results.length === 0) {
+                    // If filters are active, hide prompts with no metrics
+                    return !hasScoreRangeFilter;
+                }
+
+                // Check if prompt has any metric score in the selected score ranges
+                const matchesScoreRange = !hasScoreRangeFilter ||
+                    prompt.prompt_level_metric_results.some(metric => {
+                        if (metric.number_value !== undefined && metric.number_value !== null) {
+                            const range = getScoreRange(metric.number_value);
+                            return selectedScoreRanges.has(range);
+                        }
+                        return false;
+                    });
+
+                // Show prompt if it matches score range filter (or no score range filter)
+                return matchesScoreRange;
             });
         }
 
@@ -545,9 +930,25 @@
                 `
                 : '';
 
+            // Sort metrics by name for consistent ordering
+            const sortedMetrics = prompt.prompt_level_metric_results && prompt.prompt_level_metric_results.length > 0
+                ? [...prompt.prompt_level_metric_results].sort((a, b) => {
+                    const nameA = (a.metric_name || '').toLowerCase();
+                    const nameB = (b.metric_name || '').toLowerCase();
+                    return nameA.localeCompare(nameB);
+                })
+                : [];
+
+            const badgesHtml = sortedMetrics.length > 0
+                ? sortedMetrics.map(metric => createMetricBadge(metric)).join('')
+                : '';
+
             return `
                 <div class="prompt-card">
-                    <div class="prompt-header">Prompt #${prompt.prompt_id}</div>
+                    <div class="prompt-header">
+                        <span class="prompt-header-title">Prompt #${prompt.prompt_id}</span>
+                        ${badgesHtml}
+                    </div>
                     
                     <div class="prompt-section">
                         <div class="prompt-section-label">Input</div>
@@ -573,10 +974,17 @@
                 ? `<div class="metric-error">Error: ${escapeHtml(metric.error_description)}</div>`
                 : '';
 
+            // Get color based on score if available
+            let valueStyle = '';
+            if (metric.number_value !== undefined && metric.number_value !== null) {
+                const color = getScoreColor(metric.number_value);
+                valueStyle = `style="color: ${color.text};"`;
+            }
+
             return `
                 <div class="metric-item">
                     <div class="metric-name">${escapeHtml(metric.metric_name || 'N/A')}</div>
-                    <div class="metric-value">${valueHtml}</div>
+                    <div class="metric-value" ${valueStyle}>${valueHtml}</div>
                     <div class="metric-type">${escapeHtml(metric.metric_value_type || 'N/A')}</div>
                     ${reasoningHtml}
                     ${errorHtml}
@@ -615,6 +1023,83 @@
                 // Fallback to escaped text if markdown parsing fails
                 return escapeHtml(text);
             }
+        }
+
+        // Color palette with 20 distinct, well-separated colors for metrics
+        // Each color has a light background and dark text color for good contrast
+        const metricColorPalette = [
+            { bg: '#E6F3FF', text: '#0066CC' },  // Blue
+            { bg: '#FFF4E6', text: '#CC6600' },  // Orange
+            { bg: '#E6F7E6', text: '#006600' },  // Green
+            { bg: '#F0E6FF', text: '#6600CC' },  // Purple
+            { bg: '#FFE6E6', text: '#CC0000' },  // Red
+            { bg: '#E6FFF0', text: '#00CC66' },  // Mint
+            { bg: '#FFF0E6', text: '#CC3300' },  // Coral
+            { bg: '#E6F0FF', text: '#0033CC' },  // Deep Blue
+            { bg: '#FFF6E6', text: '#CC9900' }, // Amber
+            { bg: '#F0E6F7', text: '#9900CC' }, // Lavender
+            { bg: '#E6FFF7', text: '#00CC99' }, // Turquoise
+            { bg: '#FFE6F0', text: '#CC0066' }, // Pink
+            { bg: '#F7F0E6', text: '#996600' },  // Brown
+            { bg: '#E6FFFA', text: '#00CCCC' },  // Cyan
+            { bg: '#FFF0F0', text: '#CC3333' }, // Rose
+            { bg: '#F0F7E6', text: '#669900' }, // Olive
+            { bg: '#E6E6FF', text: '#6666CC' }, // Periwinkle
+            { bg: '#FFF7E6', text: '#CC7700' }, // Peach
+            { bg: '#F7E6FF', text: '#9900CC' }, // Lilac
+            { bg: '#E6FFF5', text: '#00CC88' }  // Teal
+        ];
+
+        function getMetricColor(metricName) {
+            // Generate a consistent hash from metric name
+            let hash = 0;
+            for (let i = 0; i < metricName.length; i++) {
+                hash = metricName.charCodeAt(i) + ((hash << 5) - hash);
+                hash = hash & hash; // Convert to 32-bit integer
+            }
+            
+            // Map hash to one of the 20 colors
+            const colorIndex = Math.abs(hash) % metricColorPalette.length;
+            return metricColorPalette[colorIndex];
+        }
+
+        function getScoreColor(score) {
+            // Color based on score ranges:
+            // 0-60: red
+            // 60-90: yellow
+            // 90+: green
+            if (score < 60) {
+                return { bg: '#FED7D7', text: '#742A2A' }; // Red
+            } else if (score < 90) {
+                return { bg: '#FEFCBF', text: '#744210' }; // Yellow
+            } else {
+                return { bg: '#C6F6D5', text: '#22543D' }; // Green
+            }
+        }
+
+        function createMetricBadge(metric) {
+            if (metric.number_value === undefined || metric.number_value === null) {
+                return '';
+            }
+
+            const value = metric.number_value;
+            const valueDisplay = metric.metric_value_type === 'METRIC_VALUE_TYPE_PERCENTAGE' 
+                ? `${value.toFixed(0)}%`
+                : value.toString();
+            
+            // Get color based on score value
+            const metricName = metric.metric_name || 'N/A';
+            const color = getScoreColor(value);
+
+            // Shorten metric name if too long
+            const shortName = metricName.length > 20 
+                ? metricName.substring(0, 18) + '...'
+                : metricName;
+
+            return `<span class="metric-badge" data-metric-color="${escapeHtml(metricName)}" style="--metric-bg: ${color.bg}; --metric-text: ${color.text};">
+                <span class="metric-badge-name">${escapeHtml(shortName)}:</span>
+                <span class="metric-badge-value">${valueDisplay}</span>
+            </span>`;
         }
     </script>
 </body>
