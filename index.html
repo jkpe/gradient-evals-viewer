@@ -616,12 +616,12 @@
                     </div>
                 </div>
             </div>
-            <div class="score-matrix-container">
-                <table id="scoreMatrix" class="score-matrix"></table>
-            </div>
             <div class="metric-filters">
                 <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #2d3748; margin-top: 20px;">Filter by Metric</h3>
                 <div class="filter-checkboxes" id="filterCheckboxes"></div>
+            </div>
+            <div class="score-matrix-container">
+                <table id="scoreMatrix" class="score-matrix"></table>
             </div>
         </div>
 
@@ -687,7 +687,7 @@
             // Store prompts and build score matrix
             if (data.prompts && Array.isArray(data.prompts)) {
                 allPrompts = data.prompts;
-                buildScoreMatrix(data.prompts);
+                buildScoreMatrix(data.prompts, data.prompts);
                 buildFilterCheckboxes(data.prompts);
                 setupScoreRangeFilters();
                 scoreFilterSection.classList.add('visible');
@@ -753,10 +753,12 @@
             });
         }
 
-        function buildScoreMatrix(prompts) {
-            // Collect all unique metric names
+        function buildScoreMatrix(prompts, allPromptsForHeaders) {
+            // Use all prompts to collect all unique metric names for headers
+            // This ensures the table shows all possible metrics even if filtered
+            const promptsForHeaders = allPromptsForHeaders || prompts;
             const metricNames = new Set();
-            prompts.forEach(prompt => {
+            promptsForHeaders.forEach(prompt => {
                 if (prompt.prompt_level_metric_results) {
                     prompt.prompt_level_metric_results.forEach(metric => {
                         if (metric.metric_name) {
@@ -775,7 +777,7 @@
             });
             html += '</tr></thead>';
 
-            // Build table body
+            // Build table body using filtered prompts
             html += '<tbody>';
             prompts.forEach(prompt => {
                 html += `<tr><td><a href="#prompt-${prompt.prompt_id}" class="prompt-link" data-prompt-id="${prompt.prompt_id}">Prompt #${prompt.prompt_id}</a></td>`;
@@ -844,8 +846,8 @@
                     } else {
                         selectedMetricFilters.delete(metricName);
                     }
-                    // Re-display prompts with new filter
-                    displayPrompts(allPrompts);
+                    // Update both prompts and score matrix with new filter
+                    updateFilteredResults();
                 });
             });
         }
@@ -860,10 +862,19 @@
                     } else {
                         selectedScoreRanges.delete(range);
                     }
-                    // Re-display prompts with new filter
-                    displayPrompts(allPrompts);
+                    // Update both prompts and score matrix with new filter
+                    updateFilteredResults();
                 });
             });
+        }
+
+        function updateFilteredResults() {
+            // Get filtered prompts
+            const filteredPrompts = filterPromptsByMetrics(allPrompts);
+            
+            // Update both the score matrix and the prompt cards
+            buildScoreMatrix(filteredPrompts, allPrompts);
+            displayPrompts(allPrompts); // displayPrompts will filter internally via filterPromptsByMetrics
         }
 
         function getScoreRange(score) {
@@ -950,31 +961,31 @@
                 return prompts;
             }
 
-            // Filter prompts that have at least one metric matching the selected filters
+            // Filter prompts based on selected filters
             return prompts.filter(prompt => {
                 if (!prompt.prompt_level_metric_results || prompt.prompt_level_metric_results.length === 0) {
                     // If filters are active, hide prompts with no metrics
-                    return !hasMetricFilter && !hasScoreRangeFilter;
+                    return false;
                 }
 
-                // Check if prompt has any metric that matches the selected metric filters
-                const matchesMetricFilter = !hasMetricFilter || 
-                    prompt.prompt_level_metric_results.some(metric => {
-                        return metric.metric_name && selectedMetricFilters.has(metric.metric_name);
-                    });
-
-                // Check if prompt has any metric score in the selected score ranges
-                const matchesScoreRange = !hasScoreRangeFilter ||
-                    prompt.prompt_level_metric_results.some(metric => {
-                        if (metric.number_value !== undefined && metric.number_value !== null) {
-                            const range = getScoreRange(metric.number_value);
-                            return selectedScoreRanges.has(range);
-                        }
-                        return false;
-                    });
-
-                // Show prompt if it matches both metric filter (or no metric filter) AND score range filter (or no score range filter)
-                return matchesMetricFilter && matchesScoreRange;
+                // Check if prompt has at least one metric that matches the filter criteria
+                // If both metric and score filters are selected, the same metric must match both
+                // If only one type of filter is selected, we check just that filter
+                return prompt.prompt_level_metric_results.some(metric => {
+                    // Check metric name filter
+                    const metricNameMatches = !hasMetricFilter || 
+                        (metric.metric_name && selectedMetricFilters.has(metric.metric_name));
+                    
+                    // Check score range filter
+                    let scoreRangeMatches = !hasScoreRangeFilter;
+                    if (hasScoreRangeFilter && metric.number_value !== undefined && metric.number_value !== null) {
+                        const range = getScoreRange(metric.number_value);
+                        scoreRangeMatches = selectedScoreRanges.has(range);
+                    }
+                    
+                    // Metric matches if it satisfies both filters (or whichever filters are active)
+                    return metricNameMatches && scoreRangeMatches;
+                });
             });
         }
 
