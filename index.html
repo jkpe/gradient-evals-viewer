@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluation Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Proxima Nova', 'ProximaNova', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #1a1a1a;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #1a1a1a;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #cbd5e0;
+            border-radius: 6px;
+            background: #f7fafc;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .file-input-wrapper input[type="file"]:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .metadata-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .metadata-section.visible {
+            display: block;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .metadata-item {
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 6px;
+        }
+
+        .metadata-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .metadata-value {
+            font-size: 14px;
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .pass-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .pass-status.true {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .pass-status.false {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .prompts-container {
+            display: none;
+        }
+
+        .prompts-container.visible {
+            display: block;
+        }
+
+        .prompt-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s;
+        }
+
+        .prompt-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .prompt-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2d3748;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .prompt-section {
+            margin-bottom: 20px;
+        }
+
+        .prompt-section-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .prompt-content {
+            background: #f7fafc;
+            padding: 16px;
+            border-radius: 6px;
+            border-left: 3px solid #4299e1;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #2d3748;
+        }
+
+        .prompt-content.markdown {
+            white-space: normal;
+        }
+
+        .prompt-content.markdown h1,
+        .prompt-content.markdown h2,
+        .prompt-content.markdown h3,
+        .prompt-content.markdown h4,
+        .prompt-content.markdown h5,
+        .prompt-content.markdown h6 {
+            margin: 16px 0 8px 0;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .prompt-content.markdown h1 {
+            font-size: 20px;
+        }
+
+        .prompt-content.markdown h2 {
+            font-size: 18px;
+        }
+
+        .prompt-content.markdown h3 {
+            font-size: 16px;
+        }
+
+        .prompt-content.markdown p {
+            margin: 8px 0;
+        }
+
+        .prompt-content.markdown ul,
+        .prompt-content.markdown ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+
+        .prompt-content.markdown li {
+            margin: 4px 0;
+        }
+
+        .prompt-content.markdown strong,
+        .prompt-content.markdown b {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .prompt-content.markdown em,
+        .prompt-content.markdown i {
+            font-style: italic;
+        }
+
+        .prompt-content.markdown code {
+            background: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+        }
+
+        .prompt-content.markdown pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .prompt-content.markdown pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+
+        .prompt-content.markdown a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        .prompt-content.markdown a:hover {
+            text-decoration: underline;
+        }
+
+        .prompt-content.markdown hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 16px 0;
+        }
+
+        .prompt-content.markdown blockquote {
+            border-left: 3px solid #cbd5e0;
+            padding-left: 16px;
+            margin: 12px 0;
+            color: #4a5568;
+            font-style: italic;
+        }
+
+        .output-content {
+            border-left-color: #48bb78;
+        }
+
+        .metrics-expander {
+            margin-top: 20px;
+        }
+
+        .metrics-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #edf2f7;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            user-select: none;
+        }
+
+        .metrics-header:hover {
+            background: #e2e8f0;
+        }
+
+        .metrics-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .metrics-toggle {
+            font-size: 20px;
+            color: #718096;
+            transition: transform 0.3s;
+        }
+
+        .metrics-toggle.expanded {
+            transform: rotate(180deg);
+        }
+
+        .metrics-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .metrics-content.expanded {
+            max-height: 5000px;
+            transition: max-height 0.5s ease-in;
+        }
+
+        .metrics-list {
+            padding: 16px;
+            background: #f7fafc;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        .metric-item {
+            background: white;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border-left: 3px solid #9f7aea;
+        }
+
+        .metric-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .metric-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4299e1;
+            margin-bottom: 4px;
+        }
+
+        .metric-type {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .metric-reasoning {
+            font-size: 13px;
+            color: #4a5568;
+            line-height: 1.6;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+            white-space: pre-wrap;
+        }
+
+        .metric-error {
+            font-size: 13px;
+            color: #e53e3e;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+            font-style: italic;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DigitalOcean Gradient™ AI Platform Evaluation Viewer</h1>
+
+        <div class="upload-section">
+            <label for="jsonFile">Upload JSON Evaluation File</label>
+            <div class="file-input-wrapper">
+                <input type="file" id="jsonFile" accept=".json" />
+            </div>
+        </div>
+
+        <div id="metadataSection" class="metadata-section">
+            <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 16px; color: #2d3748;">Evaluation Run Metadata</h2>
+            <div id="metadataContent" class="metadata-grid"></div>
+        </div>
+
+        <div id="promptsContainer" class="prompts-container">
+            <div id="promptsList"></div>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+            <div class="empty-state-icon">📄</div>
+            <div class="empty-state-text">Upload a JSON file to view evaluation data</div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('jsonFile');
+        const metadataSection = document.getElementById('metadataSection');
+        const metadataContent = document.getElementById('metadataContent');
+        const promptsContainer = document.getElementById('promptsContainer');
+        const promptsList = document.getElementById('promptsList');
+        const emptyState = document.getElementById('emptyState');
+
+        fileInput.addEventListener('change', handleFileUpload);
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    displayEvaluationData(data);
+                } catch (error) {
+                    alert('Error parsing JSON file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function displayEvaluationData(data) {
+            // Hide empty state
+            emptyState.style.display = 'none';
+
+            // Display metadata if available
+            if (data.evaluation_run) {
+                displayMetadata(data.evaluation_run);
+                metadataSection.classList.add('visible');
+            }
+
+            // Display prompts
+            if (data.prompts && Array.isArray(data.prompts)) {
+                displayPrompts(data.prompts);
+                promptsContainer.classList.add('visible');
+            }
+        }
+
+        function displayMetadata(evalRun) {
+            const metadata = [
+                { label: 'Run Name', value: evalRun.run_name || 'N/A' },
+                { label: 'Status', value: evalRun.status || 'N/A' },
+                { label: 'Test Case', value: evalRun.test_case_name || 'N/A' },
+                { label: 'Agent Name', value: evalRun.agent_name || 'N/A' },
+                { label: 'Pass Status', value: evalRun.pass_status !== undefined ? String(evalRun.pass_status) : 'N/A', isStatus: true },
+                { label: 'Started At', value: evalRun.started_at || 'N/A' },
+                { label: 'Finished At', value: evalRun.finished_at || 'N/A' },
+            ];
+
+            if (evalRun.star_metric_result) {
+                metadata.push({
+                    label: 'Star Metric',
+                    value: `${evalRun.star_metric_result.metric_name || 'N/A'}: ${formatMetricValue(evalRun.star_metric_result)}`
+                });
+            }
+
+            metadataContent.innerHTML = metadata.map(item => {
+                let valueHtml = item.value;
+                if (item.isStatus) {
+                    const statusClass = item.value === 'true' ? 'true' : 'false';
+                    valueHtml = `<span class="pass-status ${statusClass}">${item.value}</span>`;
+                }
+                return `
+                    <div class="metadata-item">
+                        <div class="metadata-label">${item.label}</div>
+                        <div class="metadata-value">${valueHtml}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayPrompts(prompts) {
+            promptsList.innerHTML = prompts.map(prompt => createPromptCard(prompt)).join('');
+            
+            // Attach event listeners to expanders
+            document.querySelectorAll('.metrics-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    const toggle = this.querySelector('.metrics-toggle');
+                    content.classList.toggle('expanded');
+                    toggle.classList.toggle('expanded');
+                });
+            });
+        }
+
+        function createPromptCard(prompt) {
+            const metricsHtml = prompt.prompt_level_metric_results && prompt.prompt_level_metric_results.length > 0
+                ? `
+                    <div class="metrics-expander">
+                        <div class="metrics-header">
+                            <span class="metrics-title">Metric Results (${prompt.prompt_level_metric_results.length})</span>
+                            <span class="metrics-toggle">▼</span>
+                        </div>
+                        <div class="metrics-content">
+                            <div class="metrics-list">
+                                ${prompt.prompt_level_metric_results.map(metric => createMetricItem(metric)).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `
+                : '';
+
+            return `
+                <div class="prompt-card">
+                    <div class="prompt-header">Prompt #${prompt.prompt_id}</div>
+                    
+                    <div class="prompt-section">
+                        <div class="prompt-section-label">Input</div>
+                        <div class="prompt-content">${escapeHtml(prompt.input || 'N/A')}</div>
+                    </div>
+                    
+                    <div class="prompt-section">
+                        <div class="prompt-section-label">Output</div>
+                        <div class="prompt-content output-content markdown">${renderMarkdown(prompt.output || 'N/A')}</div>
+                    </div>
+                    
+                    ${metricsHtml}
+                </div>
+            `;
+        }
+
+        function createMetricItem(metric) {
+            const valueHtml = formatMetricValue(metric);
+            const reasoningHtml = metric.reasoning 
+                ? `<div class="metric-reasoning">${escapeHtml(metric.reasoning)}</div>` 
+                : '';
+            const errorHtml = metric.error_description
+                ? `<div class="metric-error">Error: ${escapeHtml(metric.error_description)}</div>`
+                : '';
+
+            return `
+                <div class="metric-item">
+                    <div class="metric-name">${escapeHtml(metric.metric_name || 'N/A')}</div>
+                    <div class="metric-value">${valueHtml}</div>
+                    <div class="metric-type">${escapeHtml(metric.metric_value_type || 'N/A')}</div>
+                    ${reasoningHtml}
+                    ${errorHtml}
+                </div>
+            `;
+        }
+
+        function formatMetricValue(metric) {
+            if (metric.number_value !== undefined && metric.number_value !== null) {
+                if (metric.metric_value_type === 'METRIC_VALUE_TYPE_PERCENTAGE') {
+                    return `${metric.number_value.toFixed(2)}%`;
+                }
+                return metric.number_value.toString();
+            }
+            return 'N/A';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderMarkdown(text) {
+            if (!text || text === 'N/A') return 'N/A';
+            try {
+                // Configure marked options
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    headerIds: false,
+                    mangle: false
+                });
+                return marked.parse(text);
+            } catch (error) {
+                // Fallback to escaped text if markdown parsing fails
+                return escapeHtml(text);
+            }
+        }
+    </script>
+</body>
+</html>
+
