@@ -598,7 +598,7 @@
         </div>
 
         <div id="scoreFilterSection" class="score-filter-section">
-            <h2>Score Matrix</h2>
+            <h2>Score Matrix & Filters</h2>
             <div class="score-range-filters">
                 <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #2d3748;">Filter by Score Range</h3>
                 <div class="filter-checkboxes" id="scoreRangeFilters">
@@ -618,6 +618,10 @@
             </div>
             <div class="score-matrix-container">
                 <table id="scoreMatrix" class="score-matrix"></table>
+            </div>
+            <div class="metric-filters">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #2d3748; margin-top: 20px;">Filter by Metric</h3>
+                <div class="filter-checkboxes" id="filterCheckboxes"></div>
             </div>
         </div>
 
@@ -645,9 +649,11 @@
         const emptyState = document.getElementById('emptyState');
         const scoreFilterSection = document.getElementById('scoreFilterSection');
         const scoreMatrix = document.getElementById('scoreMatrix');
+        const filterCheckboxes = document.getElementById('filterCheckboxes');
         const scoreRangeFilters = document.getElementById('scoreRangeFilters');
 
         let allPrompts = [];
+        let selectedMetricFilters = new Set();
         let selectedScoreRanges = new Set(['poor', 'medium', 'good']); // All selected by default
 
         fileInput.addEventListener('change', handleFileUpload);
@@ -682,6 +688,7 @@
             if (data.prompts && Array.isArray(data.prompts)) {
                 allPrompts = data.prompts;
                 buildScoreMatrix(data.prompts);
+                buildFilterCheckboxes(data.prompts);
                 setupScoreRangeFilters();
                 scoreFilterSection.classList.add('visible');
                 displayPrompts(data.prompts);
@@ -723,8 +730,8 @@
         }
 
         function displayPrompts(prompts) {
-            // Filter prompts based on selected score range filters
-            const filteredPrompts = filterPromptsByScoreRange(prompts);
+            // Filter prompts based on selected metric filters
+            const filteredPrompts = filterPromptsByMetrics(prompts);
             
             promptsList.innerHTML = filteredPrompts.map(prompt => createPromptCard(prompt)).join('');
             
@@ -801,6 +808,47 @@
             });
         }
 
+        function buildFilterCheckboxes(prompts) {
+            // Collect all unique metric names
+            const metricNames = new Set();
+            prompts.forEach(prompt => {
+                if (prompt.prompt_level_metric_results) {
+                    prompt.prompt_level_metric_results.forEach(metric => {
+                        if (metric.metric_name) {
+                            metricNames.add(metric.metric_name);
+                        }
+                    });
+                }
+            });
+
+            const sortedMetricNames = Array.from(metricNames).sort();
+
+            // Build checkboxes - all checked by default
+            filterCheckboxes.innerHTML = sortedMetricNames.map(metricName => {
+                const checkboxId = `filter-${metricName.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                selectedMetricFilters.add(metricName); // Add all by default
+                return `
+                    <div class="filter-checkbox-item">
+                        <input type="checkbox" id="${checkboxId}" data-metric="${escapeHtml(metricName)}" checked>
+                        <label for="${checkboxId}">${escapeHtml(metricName)}</label>
+                    </div>
+                `;
+            }).join('');
+
+            // Add event listeners to checkboxes
+            filterCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const metricName = this.getAttribute('data-metric');
+                    if (this.checked) {
+                        selectedMetricFilters.add(metricName);
+                    } else {
+                        selectedMetricFilters.delete(metricName);
+                    }
+                    // Re-display prompts with new filter
+                    displayPrompts(allPrompts);
+                });
+            });
+        }
 
         function setupScoreRangeFilters() {
             // Add event listeners to score range checkboxes
@@ -812,9 +860,8 @@
                     } else {
                         selectedScoreRanges.delete(range);
                     }
-                    // Re-display prompts and score matrix with new filter
+                    // Re-display prompts with new filter
                     displayPrompts(allPrompts);
-                    updateScoreMatrix();
                 });
             });
         }
@@ -838,8 +885,19 @@
                 // Find the prompt in allPrompts
                 const prompt = allPrompts.find(p => p.prompt_id === parseInt(promptId));
                 if (prompt && prompt.prompt_level_metric_results) {
-                    // Ensure the score range for this metric is selected
+                    // Add all metrics from this prompt to the selected filters
                     prompt.prompt_level_metric_results.forEach(metric => {
+                        if (metric.metric_name) {
+                            selectedMetricFilters.add(metric.metric_name);
+                            // Also update the checkbox - find it by checking all metric checkboxes
+                            filterCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                                if (checkbox.getAttribute('data-metric') === metric.metric_name) {
+                                    checkbox.checked = true;
+                                }
+                            });
+                        }
+                        
+                        // Also ensure the score range for this metric is selected
                         if (metric.number_value !== undefined && metric.number_value !== null) {
                             const range = getScoreRange(metric.number_value);
                             selectedScoreRanges.add(range);
@@ -883,20 +941,27 @@
             }, 2000);
         }
 
-        function filterPromptsByScoreRange(prompts) {
+        function filterPromptsByMetrics(prompts) {
             // If no filters selected, show all prompts
+            const hasMetricFilter = selectedMetricFilters.size > 0;
             const hasScoreRangeFilter = selectedScoreRanges.size > 0;
 
-            if (!hasScoreRangeFilter) {
+            if (!hasMetricFilter && !hasScoreRangeFilter) {
                 return prompts;
             }
 
-            // Filter prompts that have at least one metric score in the selected score ranges
+            // Filter prompts that have at least one metric matching the selected filters
             return prompts.filter(prompt => {
                 if (!prompt.prompt_level_metric_results || prompt.prompt_level_metric_results.length === 0) {
                     // If filters are active, hide prompts with no metrics
-                    return !hasScoreRangeFilter;
+                    return !hasMetricFilter && !hasScoreRangeFilter;
                 }
+
+                // Check if prompt has any metric that matches the selected metric filters
+                const matchesMetricFilter = !hasMetricFilter || 
+                    prompt.prompt_level_metric_results.some(metric => {
+                        return metric.metric_name && selectedMetricFilters.has(metric.metric_name);
+                    });
 
                 // Check if prompt has any metric score in the selected score ranges
                 const matchesScoreRange = !hasScoreRangeFilter ||
@@ -908,8 +973,8 @@
                         return false;
                     });
 
-                // Show prompt if it matches score range filter (or no score range filter)
-                return matchesScoreRange;
+                // Show prompt if it matches both metric filter (or no metric filter) AND score range filter (or no score range filter)
+                return matchesMetricFilter && matchesScoreRange;
             });
         }
 
