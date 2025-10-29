@@ -1,4 +1,5 @@
-# DigitalOcean Gradient™ AI Platform Evaluation Viewer
+<img width="1285" height="833" alt="DigitalOcean Gradient™ AI Platform Evaluation Viewer" src="https://github.com/user-attachments/assets/c1682bf0-978e-4dc4-9ac7-589d593f2fe1" />
+
 
 A simple tool to make viewing eval results from the [DigitalOcean Gradient AI platform](https://docs.digitalocean.com/products/gradient-ai-platform/) quicker.
 
