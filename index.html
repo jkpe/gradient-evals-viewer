@@ -655,6 +655,48 @@
             color: #111827;
         }
 
+        .copy-sheets-button {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            background: #059669;
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s;
+            margin-bottom: 16px;
+        }
+
+        .copy-sheets-button:hover:not(:disabled) {
+            background: #047857;
+        }
+
+        .copy-sheets-button:active:not(:disabled) {
+            background: #065f46;
+        }
+
+        .copy-sheets-button:disabled {
+            background: #D1D5DB;
+            color: #9CA3AF;
+            cursor: not-allowed;
+        }
+
+        .copy-feedback {
+            display: inline-block;
+            margin-left: 12px;
+            font-size: 13px;
+            color: #059669;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .copy-feedback.show {
+            opacity: 1;
+        }
+
         .score-matrix-container {
             overflow-x: auto;
             margin-bottom: 20px;
@@ -901,6 +943,37 @@
         .instructions-details > *:not(summary) {
             margin-top: 12px;
         }
+
+        .api-loading-indicator {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #E6F3FF;
+            border: 1px solid #0080FF;
+            border-radius: 4px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #0066CC;
+            font-weight: 500;
+        }
+
+        .api-loading-indicator.visible {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 128, 255, 0.2);
+            border-top-color: #0080FF;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -956,6 +1029,11 @@
 
             <div id="apiStatus" class="api-status"></div>
             <div id="apiError" class="api-error"></div>
+            
+            <div id="apiLoadingIndicator" class="api-loading-indicator">
+                <div class="spinner"></div>
+                <span id="apiLoadingText">Loading...</span>
+            </div>
 
             <div class="api-selectors">
                 <div class="api-select-group">
@@ -989,6 +1067,10 @@
 
         <div id="scoreFilterSection" class="score-filter-section">
             <h2>Score Matrix & Filters</h2>
+            <div style="margin-bottom: 16px;">
+                <button id="copySheetsButton" class="copy-sheets-button">Copy to Google Sheets</button>
+                <span id="copyFeedback" class="copy-feedback">Copied to clipboard!</span>
+            </div>
             <div class="score-range-filters">
                 <h3 style="font-size: 13px; font-weight: 500; margin-bottom: 8px; color: #374151;">Filter by Score Range</h3>
                 <div class="filter-checkboxes" id="scoreRangeFilters">
@@ -1049,6 +1131,8 @@
         const runSelect = document.getElementById('runSelect');
         const apiErrorEl = document.getElementById('apiError');
         const apiStatusEl = document.getElementById('apiStatus');
+        const apiLoadingIndicator = document.getElementById('apiLoadingIndicator');
+        const apiLoadingText = document.getElementById('apiLoadingText');
 
         let allPrompts = [];
         let selectedMetricFilters = new Set();
@@ -1060,7 +1144,18 @@
         let selectedTestCaseId = null;
         let selectedRunId = null;
 
+        // Store current evaluation run metadata for copy functionality
+        let currentEvalRun = null;
+
         fileInput.addEventListener('change', handleFileUpload);
+
+        // Copy to Google Sheets button
+        const copySheetsButton = document.getElementById('copySheetsButton');
+        const copyFeedback = document.getElementById('copyFeedback');
+        
+        if (copySheetsButton) {
+            copySheetsButton.addEventListener('click', copyToGoogleSheets);
+        }
 
         if (loadTestCasesButton) {
             loadTestCasesButton.addEventListener('click', () => {
@@ -1120,6 +1215,19 @@
                 apiErrorEl.style.display = 'block';
                 apiErrorEl.textContent = message;
             }
+        }
+
+        function showApiLoading(message = 'Loading...') {
+            if (!apiLoadingIndicator) return;
+            if (apiLoadingText) {
+                apiLoadingText.textContent = message;
+            }
+            apiLoadingIndicator.classList.add('visible');
+        }
+
+        function hideApiLoading() {
+            if (!apiLoadingIndicator) return;
+            apiLoadingIndicator.classList.remove('visible');
         }
 
         function setButtonLoading(button, isLoading, labelWhenIdle, labelWhenLoading) {
@@ -1195,7 +1303,8 @@
             if (!loadTestCasesButton) return;
 
             setApiError('');
-            setApiStatus('Loading test cases...');
+            setApiStatus('');
+            showApiLoading('Loading test cases...');
             resetApiSelections();
 
             setButtonLoading(loadTestCasesButton, true, 'Load Test Cases', 'Loading...');
@@ -1236,6 +1345,7 @@
                 // apiFetch already set a user-friendly error; just clear status
                 setApiStatus('');
             } finally {
+                hideApiLoading();
                 setButtonLoading(loadTestCasesButton, false, 'Load Test Cases', 'Loading...');
             }
         }
@@ -1262,7 +1372,8 @@
             if (!testCaseId) return;
 
             setApiError('');
-            setApiStatus('Loading evaluation runs...');
+            setApiStatus('');
+            showApiLoading('Loading evaluation runs...');
 
             apiEvaluationRuns = [];
             selectedRunId = null;
@@ -1323,6 +1434,8 @@
                     runSelect.innerHTML = '<option value="">Failed to load runs</option>';
                     runSelect.disabled = true;
                 }
+            } finally {
+                hideApiLoading();
             }
         }
 
@@ -1330,7 +1443,8 @@
             if (!runId) return;
 
             setApiError('');
-            setApiStatus('Loading evaluation results...');
+            setApiStatus('');
+            showApiLoading('Loading evaluation results...');
 
             try {
                 const path = `/v2/gen-ai/evaluation_runs/${encodeURIComponent(runId)}/results`;
@@ -1342,6 +1456,8 @@
             } catch (error) {
                 // apiFetch already set a user-friendly error; just clear status
                 setApiStatus('');
+            } finally {
+                hideApiLoading();
             }
         }
 
@@ -1351,6 +1467,7 @@
 
             // Display metadata if available
             if (data.evaluation_run) {
+                currentEvalRun = data.evaluation_run;
                 displayMetadata(data.evaluation_run);
                 metadataSection.classList.add('visible');
             }
@@ -1847,6 +1964,140 @@
                 <span class="metric-badge-name">${escapeHtml(shortName)}:</span>
                 <span class="metric-badge-value">${valueDisplay}</span>
             </span>`;
+        }
+
+        async function copyToGoogleSheets() {
+            if (!allPrompts || allPrompts.length === 0) {
+                alert('No evaluation data to copy. Please load an evaluation first.');
+                return;
+            }
+
+            try {
+                // Collect all unique metric names
+                const metricNames = new Set();
+                allPrompts.forEach(prompt => {
+                    if (prompt.prompt_level_metric_results) {
+                        prompt.prompt_level_metric_results.forEach(metric => {
+                            if (metric.metric_name) {
+                                metricNames.add(metric.metric_name);
+                            }
+                        });
+                    }
+                });
+
+                const sortedMetricNames = Array.from(metricNames).sort();
+
+                // Build HTML table with formatting
+                let html = '<table>';
+
+                // Add evaluation run metadata
+                if (currentEvalRun) {
+                    const runId = currentEvalRun.evaluation_run_uuid || 
+                                 currentEvalRun.run_id || 
+                                 currentEvalRun.id || 
+                                 'N/A';
+                    const runName = currentEvalRun.run_name || 'N/A';
+                    
+                    html += `<tr><td style="font-weight:bold;">Evaluation Run ID</td><td colspan="${sortedMetricNames.length + 2}">${runId}</td></tr>`;
+                    html += `<tr><td style="font-weight:bold;">Evaluation Run Name</td><td colspan="${sortedMetricNames.length + 2}">${runName}</td></tr>`;
+                    html += '<tr><td colspan="' + (sortedMetricNames.length + 3) + '"></td></tr>'; // Blank row
+                }
+
+                // Add header row
+                html += '<tr style="font-weight:bold; background-color:#F9FAFB;">';
+                html += '<td>Prompt</td>';
+                html += '<td>Input</td>';
+                html += '<td>Output</td>';
+                sortedMetricNames.forEach(metricName => {
+                    html += `<td>${escapeHtml(metricName)}</td>`;
+                });
+                html += '</tr>';
+
+                // Add data rows
+                allPrompts.forEach(prompt => {
+                    html += '<tr>';
+                    html += `<td>Prompt #${prompt.prompt_id}</td>`;
+                    html += `<td>${escapeHtml(prompt.input || 'N/A')}</td>`;
+                    html += `<td>${escapeHtml(prompt.output || 'N/A')}</td>`;
+                    
+                    sortedMetricNames.forEach(metricName => {
+                        const metric = prompt.prompt_level_metric_results?.find(m => m.metric_name === metricName);
+                        if (metric && metric.number_value !== undefined && metric.number_value !== null) {
+                            const value = metric.number_value;
+                            const color = getScoreColor(value);
+                            const displayValue = metric.metric_value_type === 'METRIC_VALUE_TYPE_PERCENTAGE'
+                                ? `${value.toFixed(0)}%`
+                                : value.toString();
+                            html += `<td style="background-color:${color.bg}; color:${color.text}; text-align:center; font-weight:500;">${displayValue}</td>`;
+                        } else {
+                            html += '<td style="text-align:center; color:#D1D5DB;">—</td>';
+                        }
+                    });
+                    html += '</tr>';
+                });
+
+                html += '</table>';
+
+                // Build TSV fallback for plain text
+                let tsv = '';
+                if (currentEvalRun) {
+                    const runId = currentEvalRun.evaluation_run_uuid || 
+                                 currentEvalRun.run_id || 
+                                 currentEvalRun.id || 
+                                 'N/A';
+                    const runName = currentEvalRun.run_name || 'N/A';
+                    
+                    tsv += `Evaluation Run ID\t${runId}\n`;
+                    tsv += `Evaluation Run Name\t${runName}\n`;
+                    tsv += '\n';
+                }
+
+                tsv += 'Prompt\tInput\tOutput';
+                sortedMetricNames.forEach(metricName => {
+                    tsv += `\t${metricName}`;
+                });
+                tsv += '\n';
+
+                allPrompts.forEach(prompt => {
+                    // Escape tabs and newlines in the text fields
+                    const input = (prompt.input || 'N/A').replace(/\t/g, ' ').replace(/\n/g, ' ');
+                    const output = (prompt.output || 'N/A').replace(/\t/g, ' ').replace(/\n/g, ' ');
+                    
+                    tsv += `Prompt #${prompt.prompt_id}\t${input}\t${output}`;
+                    
+                    sortedMetricNames.forEach(metricName => {
+                        const metric = prompt.prompt_level_metric_results?.find(m => m.metric_name === metricName);
+                        if (metric && metric.number_value !== undefined && metric.number_value !== null) {
+                            const value = metric.metric_value_type === 'METRIC_VALUE_TYPE_PERCENTAGE'
+                                ? `${metric.number_value.toFixed(0)}%`
+                                : metric.number_value.toString();
+                            tsv += `\t${value}`;
+                        } else {
+                            tsv += '\t';
+                        }
+                    });
+                    tsv += '\n';
+                });
+
+                // Copy both HTML and plain text to clipboard
+                const clipboardItem = new ClipboardItem({
+                    'text/html': new Blob([html], { type: 'text/html' }),
+                    'text/plain': new Blob([tsv], { type: 'text/plain' })
+                });
+                
+                await navigator.clipboard.write([clipboardItem]);
+
+                // Show feedback
+                if (copyFeedback) {
+                    copyFeedback.classList.add('show');
+                    setTimeout(() => {
+                        copyFeedback.classList.remove('show');
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Failed to copy to clipboard:', error);
+                alert('Failed to copy to clipboard. Please make sure your browser allows clipboard access.');
+            }
         }
     </script>
 </body>
