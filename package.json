@@ -1,0 +1,16 @@
+{
+  "name": "gradient-evals-viewer",
+  "version": "1.0.0",
+  "description": "A viewer for DigitalOcean Gradient™ AI Platform evaluation results",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["digitalocean", "gradient", "ai", "evaluations"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

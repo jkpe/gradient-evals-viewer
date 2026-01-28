@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluation Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Evaluation Viewer</h1>
+            <p class="subtitle">DigitalOcean Gradient™ AI Platform</p>
+        </header>
+
+        <div class="card instructions-card">
+            <details class="details-section">
+                <summary class="details-summary">
+                    <span class="details-title">Getting results from the API</span>
+                    <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </summary>
+                <div class="details-content">
+                    <p>To get JSON evaluation results from the DigitalOcean Gradient AI API, follow these steps:</p>
+                    <ol class="api-steps">
+                        <li>
+                            <strong>List your test cases:</strong>
+                            <code>https://api.digitalocean.com/v2/gen-ai/evaluation_test_cases</code>
+                        </li>
+                        <li>
+                            <strong>Get evaluation runs by test case:</strong>
+                            <code>https://api.digitalocean.com/v2/gen-ai/evaluation_test_cases/&lt;test-case-id&gt;/evaluation_runs</code>
+                        </li>
+                        <li>
+                            <strong>Get results for a specific evaluation run:</strong>
+                            <code>https://api.digitalocean.com/v2/gen-ai/evaluation_runs/&lt;run-id&gt;/results</code>
+                        </li>
+                    </ol>
+                    <p>For detailed API documentation, see the <a href="https://docs.digitalocean.com/reference/api/digitalocean/" target="_blank" rel="noopener noreferrer">DigitalOcean API Reference</a>.</p>
+                    <p>You can generate a DigitalOcean personal access token at <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank" rel="noopener noreferrer">https://cloud.digitalocean.com/account/api/tokens</a> and scope it with the <code>genai:read</code> permission.</p>
+                </div>
+            </details>
+        </div>
+
+        <div class="card api-card">
+            <h2 class="card-title">Fetch Evaluation Results</h2>
+            <p class="card-description">Use your DigitalOcean API token to load evaluation results. Your token is used only in your browser and is not stored.</p>
+
+            <div class="form-group">
+                <label for="apiToken" class="form-label">API Token</label>
+                <input
+                    type="password"
+                    id="apiToken"
+                    class="input"
+                    autocomplete="off"
+                    placeholder="dop_v1_..."
+                />
+            </div>
+
+            <button id="loadTestCasesButton" class="btn btn-primary">
+                Load Test Cases
+            </button>
+
+            <div id="apiStatus" class="status-message"></div>
+            <div id="apiError" class="error-message"></div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="testCaseSelect" class="form-label">Test Case</label>
+                    <select id="testCaseSelect" class="select" disabled>
+                        <option value="">Load test cases to select</option>
+                    </select>
+                    <p class="form-help">Select an evaluation test case to view its runs</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="runSelect" class="form-label">Evaluation Run</label>
+                    <select id="runSelect" class="select" disabled>
+                        <option value="">Load runs to select</option>
+                    </select>
+                    <p class="form-help">Choose a specific run to load results</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card upload-card">
+            <h2 class="card-title">Upload JSON File</h2>
+            <p class="card-description">Or upload a JSON evaluation file directly</p>
+            <div class="file-input-wrapper">
+                <input type="file" id="jsonFile" accept=".json" class="file-input" />
+            </div>
+        </div>
+
+        <div id="scoreFilterSection" class="card filter-card hidden">
+            <h2 class="card-title">Filters</h2>
+            
+            <div class="filter-section">
+                <h3 class="filter-title">Score Range</h3>
+                <div class="filter-pills" id="scoreRangeFilters">
+                    <label class="pill-checkbox">
+                        <input type="checkbox" id="score-range-poor" data-range="poor" checked>
+                        <span class="pill pill-red">Poor (&lt; 60)</span>
+                    </label>
+                    <label class="pill-checkbox">
+                        <input type="checkbox" id="score-range-medium" data-range="medium" checked>
+                        <span class="pill pill-yellow">Medium (60-90)</span>
+                    </label>
+                    <label class="pill-checkbox">
+                        <input type="checkbox" id="score-range-good" data-range="good" checked>
+                        <span class="pill pill-green">Good (≥ 90)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3 class="filter-title">Metrics</h3>
+                <div class="filter-pills" id="filterCheckboxes"></div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="scoreMatrix" class="score-table"></table>
+            </div>
+        </div>
+
+        <div id="metadataSection" class="card metadata-card hidden">
+            <h2 class="card-title">Evaluation Run Metadata</h2>
+            <div id="metadataContent" class="metadata-grid"></div>
+        </div>
+
+        <div id="promptsContainer" class="prompts-container hidden">
+            <div id="promptsList"></div>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+            <svg class="empty-icon" width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <rect x="8" y="16" width="48" height="40" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M16 24H48M16 32H48M16 40H36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <p class="empty-text">Load evaluation results to get started</p>
+        </div>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>
