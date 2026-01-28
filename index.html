@@ -42,6 +42,142 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
+        .api-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .api-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #2d3748;
+        }
+
+        .api-section p {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 16px;
+        }
+
+        .api-token-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .api-token-row label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #4a5568;
+            min-width: 120px;
+        }
+
+        .api-token-input {
+            flex: 1;
+            min-width: 220px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e0;
+            font-size: 14px;
+        }
+
+        .api-token-input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 1px rgba(66, 153, 225, 0.4);
+        }
+
+        .api-button {
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: none;
+            background: #3182ce;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.05s;
+        }
+
+        .api-button:hover:not(:disabled) {
+            background: #2b6cb0;
+            box-shadow: 0 2px 6px rgba(49, 130, 206, 0.4);
+        }
+
+        .api-button:active:not(:disabled) {
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(49, 130, 206, 0.35);
+        }
+
+        .api-button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .api-selectors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .api-select-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .api-select-group select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e0;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .api-select-group select:disabled {
+            background: #edf2f7;
+            color: #a0aec0;
+        }
+
+        .api-inline-button {
+            margin-top: 4px;
+        }
+
+        .api-helper-text {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .api-error {
+            margin-top: 8px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            background: #fff5f5;
+            color: #c53030;
+            font-size: 13px;
+            border: 1px solid #fed7d7;
+            display: none;
+        }
+
+        .api-status {
+            margin-top: 4px;
+            font-size: 13px;
+            color: #4a5568;
+        }
+
         .upload-section label {
             display: block;
             font-weight: 600;
@@ -584,11 +720,198 @@
         .filter-checkbox-item input[type="checkbox"]:checked + label {
             color: #4299e1;
         }
+
+        .instructions-section {
+            display: block !important;
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .instructions-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        .instructions-section p {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .instructions-section code {
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            color: #2d3748;
+            border: 1px solid #e2e8f0;
+        }
+
+        .instructions-section a {
+            color: #4299e1;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .instructions-section a:hover {
+            text-decoration: underline;
+        }
+
+        .instructions-list {
+            list-style: decimal;
+            padding-left: 24px;
+            margin: 16px 0;
+        }
+
+        .instructions-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .instructions-list li:last-child {
+            border-bottom: none;
+        }
+
+        .instructions-list strong {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 6px;
+        }
+
+        .instructions-list code {
+            display: block;
+            margin-top: 6px;
+            padding: 8px 12px;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+
+        .instructions-details {
+            margin-top: 8px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 8px;
+        }
+
+        .instructions-details summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .instructions-details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .instructions-chevron {
+            font-size: 16px;
+            color: #718096;
+            margin-left: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .instructions-details[open] .instructions-chevron {
+            transform: rotate(180deg);
+        }
+
+        .instructions-details > *:not(summary) {
+            margin-top: 12px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>DigitalOcean Gradient™ AI Platform Evaluation Viewer</h1>
+
+        <div class="instructions-section">
+            <h2>How this tool works</h2>
+            <details class="instructions-details">
+                <summary>
+                    <span>Getting results from the API</span>
+                    <span class="instructions-chevron">▾</span>
+                </summary>
+                <p>To get JSON evaluation results from the DigitalOcean Gradient AI API, follow these steps:</p>
+                <ol class="instructions-list">
+                    <li>
+                        <strong>List your test cases:</strong>
+                        <code>https://api.digitalocean.com/v2/gen-ai/evaluation_test_cases</code>
+                    </li>
+                    <li>
+                        <strong>Get evaluation runs by test case:</strong>
+                        <code>https://api.digitalocean.com/v2/gen-ai/evaluation_test_cases/&lt;test-case-id&gt;/evaluation_runs</code>
+                    </li>
+                    <li>
+                        <strong>Get results for a specific evaluation run:</strong>
+                        <code>https://api.digitalocean.com/v2/gen-ai/evaluation_runs/&lt;run-id&gt;/results</code>
+                    </li>
+                </ol>
+                <p>For detailed API documentation, see the <a href="https://docs.digitalocean.com/reference/api/digitalocean/" target="_blank" rel="noopener noreferrer">DigitalOcean API Reference</a>.</p>
+                <p>You can generate a DigitalOcean personal access token at <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank" rel="noopener noreferrer">https://cloud.digitalocean.com/account/api/tokens</a> and scope it with the <code>genai:read</code> permission.</p>
+                <p>You can either fetch evaluation results directly using your API token below, or download the JSON file from the API endpoint above and upload it in the file upload section.</p>
+            </details>
+        </div>
+
+        <div class="api-section">
+            <h2>Fetch Evaluation Results with API Token</h2>
+            <p>Use your DigitalOcean API token to list evaluation test cases, choose an evaluation run, and load its results directly into this viewer. Your token is used only in your browser and is not stored.</p>
+            <p>You can generate a personal access token at <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank" rel="noopener noreferrer">https://cloud.digitalocean.com/account/api/tokens</a> and scope it with the <code>genai:read</code> permission.</p>
+
+            <div class="api-token-row">
+                <label for="apiToken">API Token</label>
+                <input
+                    type="password"
+                    id="apiToken"
+                    class="api-token-input"
+                    autocomplete="off"
+                    placeholder="digital-ocean-personal-access-token"
+                />
+                <button id="loadTestCasesButton" class="api-button">
+                    Load Test Cases
+                </button>
+            </div>
+
+            <div id="apiStatus" class="api-status"></div>
+            <div id="apiError" class="api-error"></div>
+
+            <div class="api-selectors">
+                <div class="api-select-group">
+                    <label for="testCaseSelect">Test Case</label>
+                    <select id="testCaseSelect" disabled>
+                        <option value="">Load test cases to select</option>
+                    </select>
+                    <div class="api-helper-text">
+                        After loading, pick which evaluation test case you want to inspect. Runs will load automatically.
+                    </div>
+                </div>
+
+                <div class="api-select-group">
+                    <label for="runSelect">Evaluation Run</label>
+                    <select id="runSelect" disabled>
+                        <option value="">Load runs to select</option>
+                    </select>
+                    <div class="api-helper-text">
+                        Choose a specific run for the selected test case. Results will load automatically.
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="upload-section">
             <label for="jsonFile">Upload JSON Evaluation File</label>
@@ -635,8 +958,8 @@
         </div>
 
         <div id="emptyState" class="empty-state">
-            <div class="empty-state-icon">📄</div>
-            <div class="empty-state-text">Upload a JSON file to view evaluation data</div>
+            <div class="empty-state-icon"></div>
+            <div class="empty-state-text"></div>
         </div>
     </div>
 
@@ -652,11 +975,49 @@
         const filterCheckboxes = document.getElementById('filterCheckboxes');
         const scoreRangeFilters = document.getElementById('scoreRangeFilters');
 
+        // API flow elements
+        const apiTokenInput = document.getElementById('apiToken');
+        const loadTestCasesButton = document.getElementById('loadTestCasesButton');
+        const testCaseSelect = document.getElementById('testCaseSelect');
+        const runSelect = document.getElementById('runSelect');
+        const apiErrorEl = document.getElementById('apiError');
+        const apiStatusEl = document.getElementById('apiStatus');
+
         let allPrompts = [];
         let selectedMetricFilters = new Set();
         let selectedScoreRanges = new Set(['poor', 'medium', 'good']); // All selected by default
 
+        // API flow state
+        let apiTestCases = [];
+        let apiEvaluationRuns = [];
+        let selectedTestCaseId = null;
+        let selectedRunId = null;
+
         fileInput.addEventListener('change', handleFileUpload);
+
+        if (loadTestCasesButton) {
+            loadTestCasesButton.addEventListener('click', () => {
+                loadTestCases();
+            });
+        }
+
+        if (testCaseSelect) {
+            testCaseSelect.addEventListener('change', (event) => {
+                const value = event.target.value || '';
+                onTestCaseSelected(value || null);
+            });
+        }
+
+        if (runSelect) {
+            runSelect.addEventListener('change', (event) => {
+                const value = event.target.value || '';
+                selectedRunId = value || null;
+                if (selectedRunId) {
+                    // Automatically load results when a run is selected
+                    loadEvaluationResults(selectedRunId);
+                }
+            });
+        }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
@@ -672,6 +1033,249 @@
                 }
             };
             reader.readAsText(file);
+        }
+
+        // -----------------------
+        // API helper functions
+        // -----------------------
+
+        function setApiStatus(message) {
+            if (!apiStatusEl) return;
+            apiStatusEl.textContent = message || '';
+        }
+
+        function setApiError(message) {
+            if (!apiErrorEl) return;
+            if (!message) {
+                apiErrorEl.style.display = 'none';
+                apiErrorEl.textContent = '';
+            } else {
+                apiErrorEl.style.display = 'block';
+                apiErrorEl.textContent = message;
+            }
+        }
+
+        function setButtonLoading(button, isLoading, labelWhenIdle, labelWhenLoading) {
+            if (!button) return;
+            button.disabled = isLoading || button.getAttribute('data-force-disabled') === 'true';
+            if (isLoading) {
+                button.setAttribute('data-original-label', button.textContent.trim());
+                button.textContent = labelWhenLoading || 'Loading...';
+            } else {
+                const original = button.getAttribute('data-original-label') || labelWhenIdle;
+                button.textContent = original;
+            }
+        }
+
+        async function apiFetch(path, description) {
+            const token = (apiTokenInput && apiTokenInput.value || '').trim();
+            setApiError('');
+            setApiStatus('');
+
+            if (!token) {
+                setApiError('Please enter your DigitalOcean API token to continue.');
+                throw new Error('Missing API token');
+            }
+
+            const url = `https://api.digitalocean.com${path}`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    let errorDetail = '';
+                    try {
+                        const errorBody = await response.json();
+                        if (errorBody && (errorBody.message || errorBody.error)) {
+                            errorDetail = ` - ${errorBody.message || errorBody.error}`;
+                        }
+                    } catch (_) {
+                        // Ignore JSON parse errors; fall back to status text
+                    }
+                    throw new Error(`${description || 'Request'} failed with status ${response.status}${errorDetail}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                setApiError(error.message || String(error));
+                throw error;
+            }
+        }
+
+        function resetApiSelections() {
+            apiTestCases = [];
+            apiEvaluationRuns = [];
+            selectedTestCaseId = null;
+            selectedRunId = null;
+
+            if (testCaseSelect) {
+                testCaseSelect.innerHTML = '<option value="">Load test cases to select</option>';
+                testCaseSelect.disabled = true;
+            }
+
+            if (runSelect) {
+                runSelect.innerHTML = '<option value="">Load runs to select</option>';
+                runSelect.disabled = true;
+            }
+        }
+
+        async function loadTestCases() {
+            if (!loadTestCasesButton) return;
+
+            setApiError('');
+            setApiStatus('Loading test cases...');
+            resetApiSelections();
+
+            setButtonLoading(loadTestCasesButton, true, 'Load Test Cases', 'Loading...');
+            try {
+                const data = await apiFetch('/v2/gen-ai/evaluation_test_cases', 'Fetching test cases');
+
+                const rawList = data && (
+                    data.evaluation_test_cases ||
+                    data.test_cases ||
+                    data.items ||
+                    data.results ||
+                    data
+                );
+
+                const list = Array.isArray(rawList) ? rawList : [];
+                apiTestCases = list;
+
+                if (!list.length) {
+                    setApiStatus('No evaluation test cases were found for this token.');
+                    return;
+                }
+
+                if (testCaseSelect) {
+                    testCaseSelect.innerHTML = '<option value="">Select a test case</option>';
+                    list.forEach((tc) => {
+                        const id = tc.test_case_uuid || tc.id || tc.test_case_id || tc.uuid || '';
+                        const name = tc.name || tc.test_case_name || tc.display_name || id || 'Unnamed test case';
+                        const option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = `${name} (${id})`;
+                        testCaseSelect.appendChild(option);
+                    });
+                    testCaseSelect.disabled = false;
+                }
+
+                setApiStatus(`Loaded ${list.length} test case${list.length === 1 ? '' : 's'}. Select one to continue.`);
+            } catch (error) {
+                // apiFetch already set a user-friendly error; just clear status
+                setApiStatus('');
+            } finally {
+                setButtonLoading(loadTestCasesButton, false, 'Load Test Cases', 'Loading...');
+            }
+        }
+
+        function onTestCaseSelected(testCaseId) {
+            selectedTestCaseId = testCaseId || null;
+            apiEvaluationRuns = [];
+            selectedRunId = null;
+
+            if (runSelect) {
+                runSelect.innerHTML = '<option value="">Loading runs...</option>';
+                runSelect.disabled = true;
+            }
+
+            if (!selectedTestCaseId) {
+                setApiStatus('Select a test case to load its evaluation runs.');
+            } else {
+                // Automatically load runs when a test case is selected
+                loadEvaluationRuns(selectedTestCaseId);
+            }
+        }
+
+        async function loadEvaluationRuns(testCaseId) {
+            if (!testCaseId) return;
+
+            setApiError('');
+            setApiStatus('Loading evaluation runs...');
+
+            apiEvaluationRuns = [];
+            selectedRunId = null;
+
+            if (runSelect) {
+                runSelect.innerHTML = '<option value="">Loading runs...</option>';
+                runSelect.disabled = true;
+            }
+
+            try {
+                const path = `/v2/gen-ai/evaluation_test_cases/${encodeURIComponent(testCaseId)}/evaluation_runs`;
+                const data = await apiFetch(path, 'Fetching evaluation runs');
+
+                const rawList = data && (
+                    data.evaluation_runs ||
+                    data.runs ||
+                    data.items ||
+                    data.results ||
+                    data
+                );
+
+                const list = Array.isArray(rawList) ? rawList : [];
+                apiEvaluationRuns = list;
+
+                if (!list.length) {
+                    if (runSelect) {
+                        runSelect.innerHTML = '<option value="">No runs found for this test case</option>';
+                        runSelect.disabled = true;
+                    }
+                    setApiStatus('No evaluation runs were found for this test case.');
+                    return;
+                }
+
+                if (runSelect) {
+                    runSelect.innerHTML = '<option value="">Select an evaluation run</option>';
+                    list.forEach((run) => {
+                        const id = run.evaluation_run_uuid || run.id || run.run_id || run.uuid || '';
+                        const name = run.run_name || run.name || id || 'Unnamed run';
+                        const status = run.status || run.state || '';
+                        const started = run.started_at || run.created_at || '';
+                        const labelParts = [name];
+                        if (status) labelParts.push(`status: ${status}`);
+                        if (started) labelParts.push(`started: ${started}`);
+
+                        const option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = labelParts.join(' • ');
+                        runSelect.appendChild(option);
+                    });
+                    runSelect.disabled = false;
+                }
+
+                setApiStatus(`Loaded ${list.length} evaluation run${list.length === 1 ? '' : 's'}. Select one to load results.`);
+            } catch (error) {
+                // apiFetch already set a user-friendly error; just clear status
+                setApiStatus('');
+                if (runSelect) {
+                    runSelect.innerHTML = '<option value="">Failed to load runs</option>';
+                    runSelect.disabled = true;
+                }
+            }
+        }
+
+        async function loadEvaluationResults(runId) {
+            if (!runId) return;
+
+            setApiError('');
+            setApiStatus('Loading evaluation results...');
+
+            try {
+                const path = `/v2/gen-ai/evaluation_runs/${encodeURIComponent(runId)}/results`;
+                const data = await apiFetch(path, 'Fetching evaluation results');
+
+                // Forward the API response into the existing viewer
+                displayEvaluationData(data);
+                setApiStatus('Evaluation results loaded successfully.');
+            } catch (error) {
+                // apiFetch already set a user-friendly error; just clear status
+                setApiStatus('');
+            }
         }
 
         function displayEvaluationData(data) {

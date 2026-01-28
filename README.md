@@ -5,25 +5,27 @@ A simple tool to make viewing eval results from the [DigitalOcean Gradient AI pl
 
 ## Getting Results from the API
 
-To get JSON evaluation results from the DigitalOcean Gradient AI API:
+To get JSON evaluation results from the DigitalOcean Gradient AI API, follow these steps:
 
-**Get results for a specific evaluation run:**
-
-```text
-https://api.digitalocean.com/v2/gen-ai/evaluation_runs/<run-id>/results
-```
-
-**List your test cases:**
+1. **List your test cases:**
 
 ```text
 https://api.digitalocean.com/v2/gen-ai/evaluation_test_cases
 ```
 
-**Get evaluation runs by test case:**
+2. **Get evaluation runs by test case:**
 
 ```text
 https://api.digitalocean.com/v2/gen-ai/evaluation_test_cases/<test-case-id>/evaluation_runs
 ```
+
+3. **Get results for a specific evaluation run:**
+
+```text
+https://api.digitalocean.com/v2/gen-ai/evaluation_runs/<run-id>/results
+```
+
+For detailed API documentation, see the [DigitalOcean API Reference](https://docs.digitalocean.com/reference/api/digitalocean/).
 
 ## Usage
 
